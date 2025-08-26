@@ -1,6 +1,6 @@
 # RippleMemento
 
-RippleMemento is a modern, feature-rich web monitoring application inspired by changedetection.io. It tracks changes on web pages you care about with a beautiful, responsive UI and comprehensive monitoring capabilities.
+RippleMemento is a modern, feature-rich web monitoring application . It tracks changes on web pages you care about with a beautiful, responsive UI and comprehensive monitoring capabilities.
 
 ## 🌟 Features
 
@@ -189,7 +189,7 @@ MIT License - Feel free to use this project for personal or commercial purposes.
 
 ## 🙏 Acknowledgments
 
-- Inspired by the excellent [changedetection.io](https://github.com/dgtlmoon/changedetection.io) project
+- Inspired by the excellent [new](https://github.com/dgtlmoon/new) project
 - Built with modern web technologies and best practices
 - Designed for simplicity, performance, and extensibility
 

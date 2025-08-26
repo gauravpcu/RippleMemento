@@ -1,6 +1,6 @@
 /**
  * Frontend Diff Display (diff-render.js)
- * Based on changedetection.io's approach using jsdiff library
+ * Based on new's approach using jsdiff library
  * 
  * Features:
  * - Lines vs Characters vs JSON diff modes
@@ -93,7 +93,7 @@ class DiffRenderer {
         // Show/hide floating nav based on scroll and diff content
         this.setupFloatingNavigation();
 
-        // Keyboard shortcuts (like changedetection.io)
+        // Keyboard shortcuts (like new)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
@@ -105,7 +105,7 @@ class DiffRenderer {
         });
     }
 
-    // Main diff rendering function (changedetection.io inspired)
+    // Main diff rendering function (new inspired)
     renderDiff() {
         const contentA = document.getElementById('diff-content-a')?.textContent || '';
         const contentB = document.getElementById('diff-content-b')?.textContent || '';
@@ -139,7 +139,7 @@ class DiffRenderer {
             newlineIsToken: this.currentDiffType === 'diffLines'
         };
 
-        // Calculate MD5 for change detection (like changedetection.io)
+        // Calculate MD5 for change detection (like new)
         const md5A = this.calculateMD5(contentA);
         const md5B = this.calculateMD5(contentB);
         
@@ -171,7 +171,7 @@ class DiffRenderer {
             return;
         }
 
-        // Perform diff based on selected type (changedetection.io style)
+        // Perform diff based on selected type (new style)
         try {
             switch(this.currentDiffType) {
                 case 'diffWords':
@@ -243,7 +243,7 @@ class DiffRenderer {
         }
     }
 
-    // Render the diff result with proper HTML tags (changedetection.io style)
+    // Render the diff result with proper HTML tags (new style)
     renderDiffResult(diff, container) {
         const fragment = document.createDocumentFragment();
         this.diffResults = [];
@@ -396,7 +396,7 @@ class DiffRenderer {
         if (targetElement) {
             targetElement.classList.add('diff-highlight');
             
-            // Smooth scroll to element (changedetection.io style)
+            // Smooth scroll to element (new style)
             targetElement.scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'center',
@@ -479,7 +479,7 @@ class DiffRenderer {
         };
     }
 
-    // Calculate MD5 hash for change detection (like changedetection.io)
+    // Calculate MD5 hash for change detection (like new)
     calculateMD5(content) {
         // Simple hash function for basic change detection
         // In production, you might want to use a proper MD5 library

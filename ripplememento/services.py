@@ -101,19 +101,19 @@ def apply_filters(text: str, monitor: Monitor) -> str:
 
 
 def hash_text(text: str) -> str:
-    """Calculate MD5 hash for change detection (changedetection.io approach)"""
+    """Calculate MD5 hash for change detection (new approach)"""
     import hashlib
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
 def calculate_content_hash(content: str, style: str, ignore_whitespace: bool = True, ignore_case: bool = False) -> str:
-    """Calculate hash after applying style-specific processing (changedetection.io approach)"""
+    """Calculate hash after applying style-specific processing (new approach)"""
     processed = process_content_by_style(content, style, ignore_whitespace, ignore_case)
     return hash_text(processed)
 
 
 def compute_diff(prev: str, current: str, style: str = 'words') -> tuple[str, int]:
-    """Generate HTML diff with change count based on style - changedetection.io inspired approach"""
+    """Generate HTML diff with change count based on style - new inspired approach"""
     
     # For JavaScript-based diff switching, we'll store both versions and let client handle rendering
     # But also provide server-side fallback
@@ -376,7 +376,7 @@ def escape_html(text: str) -> str:
 
 
 def record_snapshot(monitor: Monitor, raw_content: str, processed_content: str, change_count: int = 0, error_message: str = None) -> Snapshot:
-    """Record a new snapshot with proper hash calculation (changedetection.io approach)"""
+    """Record a new snapshot with proper hash calculation (new approach)"""
     content_hash = calculate_content_hash(processed_content, monitor.monitor_style, monitor.ignore_whitespace, monitor.ignore_case) if processed_content else None
     
     snap = Snapshot(
@@ -393,7 +393,7 @@ def record_snapshot(monitor: Monitor, raw_content: str, processed_content: str, 
 
 
 def check_monitor(monitor: Monitor) -> Optional[Snapshot]:
-    """Enhanced monitor checking with changedetection.io approach"""
+    """Enhanced monitor checking with new approach"""
     try:
         # Fetch content
         raw_content, text_content = fetch_text(monitor.url, monitor.css_selector, monitor.custom_headers)
@@ -419,7 +419,7 @@ def check_monitor(monitor: Monitor) -> Optional[Snapshot]:
         # Update monitor timestamp
         monitor.last_checked = db.func.now()
         
-        # Calculate MD5 hash for change detection (changedetection.io approach)
+        # Calculate MD5 hash for change detection (new approach)
         current_hash = calculate_content_hash(processed_content, monitor.monitor_style, monitor.ignore_whitespace, monitor.ignore_case)
         
         # Check for changes using MD5 comparison
@@ -429,7 +429,7 @@ def check_monitor(monitor: Monitor) -> Optional[Snapshot]:
         diff_html = ""
         
         if has_changed and last and last.content_text:
-            # Calculate detailed diff only when MD5 hashes don't match (changedetection.io approach)
+            # Calculate detailed diff only when MD5 hashes don't match (new approach)
             diff_html, change_count = compute_diff(last.content_text, processed_content, monitor.monitor_style)
             
             # Apply trigger threshold check

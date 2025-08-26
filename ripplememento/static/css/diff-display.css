@@ -1,5 +1,5 @@
 /**
- * Diff Display Styles (changedetection.io inspired)
+ * Diff Display Styles (new inspired)
  * Optimized for visual highlighting and user experience
  */
 
@@ -85,7 +85,7 @@
     );
 }
 
-/* Added content styling (like changedetection.io) */
+/* Added content styling (like new) */
 .diff-added {
     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     color: #155724;
@@ -100,7 +100,7 @@
     transform: translateY(-1px);
 }
 
-/* Removed content styling (like changedetection.io) */
+/* Removed content styling (like new) */
 .diff-removed {
     background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
     color: #721c24;
