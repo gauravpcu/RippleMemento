@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<!-- Include external libraries and styles -->
+<script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/diff-display.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-8">
+<div class="mt-6">
+  <div class="mb-6">
+    <nav class="flex items-center text-sm text-gray-500 space-x-2">
+      <a href="/" class="hover:text-gray-700">Dashboard</a>
+      <span>&gt;</span>
+      <a href="/monitors/{{ monitor.id }}" class="hover:text-gray-700">{{ monitor.name }}</a>
+      <span>&gt;</span>
+      <span class="text-gray-900">Snapshot Diff</span>
+    </nav>
+  </div>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">
+        Difference View - {{ (snapshot.created_at|local).strftime('%Y-%m-%d %H:%M:%S') }}
+      </h1>
+      <div class="mt-1 text-sm text-gray-500">
+        {{ monitor.name }} • {{ monitor.monitor_style|title }} monitoring
+        {% if snapshot.change_count > 0 %}
+        • <span class="text-blue-600 font-medium">{{ snapshot.change_count }} changes detected</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff Settings Panel (changedetection.io inspired) -->
+  <div id="diff-settings" class="bg-gray-50 rounded-lg p-4 mb-6 border">
+    <div class="flex flex-wrap items-center gap-6" id="diff-form">
+      <div class="flex items-center space-x-3">
+        <strong class="text-sm font-medium text-gray-700">Diff Style:</strong>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffWords" class="mr-2"> Words
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffLines" class="mr-2" checked> Lines
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffChars" class="mr-2"> Chars
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffJson" class="mr-2"> JSON
+        </label>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="checkbox" id="ignoreWhitespace" name="ignoreWhitespace" class="mr-2"> Ignore Spaces
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors" title="Preserve tab alignment for tabular data">
+          <input type="checkbox" id="preserveTabs" name="preserveTabs" class="mr-2" checked> Preserve Tabs
+        </label>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span id="jump-counter" class="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">-</span>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <span id="diff-counter" class="text-sm text-gray-600">0 changes</span>
+      </div>
+      
+      <div class="flex items-center space-x-2 text-xs text-gray-500">
+        <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl+N</kbd> Next
+        <kbd class="px-2 py-1 bg-gray-200 rounded text-xs">Ctrl+P</kbd> Previous
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff Display (changedetection.io style) -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="border-b bg-gray-50 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Content Differences</h3>
+        <div class="flex items-center space-x-4 text-xs text-gray-500">
+          <div class="flex items-center space-x-1">
+            <div class="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+            <span>Added</span>
+          </div>
+          <div class="flex items-center space-x-1">
+            <div class="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+            <span>Removed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <!-- Hidden content divs for JavaScript diff processing (changedetection.io approach) -->
+      <div id="diff-content-a" style="display: none;">{{ prev.content_text if prev else '' }}</div>
+      <div id="diff-content-b" style="display: none;">{{ snapshot.content_text or '' }}</div>
+      
+      <!-- Main diff result display area -->
+      <div id="diff-result" class="diff-display">
+        <div class="diff-loading">
+          <div class="spinner"></div>
+          <div>Calculating differences...</div>
+        </div>
+      </div>
+      
+      <!-- Metadata display -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+          <div>
+            <strong>Monitor Style:</strong> {{ monitor.monitor_style|title }}
+          </div>
+          <div>
+            <strong>Snapshot Time:</strong> {{ (snapshot.created_at|local).strftime('%H:%M:%S') }}
+          </div>
+          <div>
+            <strong>Content Hash:</strong> 
+            <code class="text-xs">{{ snapshot.content_hash[:12] if snapshot.content_hash else 'N/A' }}...</code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raw Content Section (collapsible) -->
+  {% if snapshot.content_text %}
+  <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+    <div class="border-b bg-gray-50 px-4 py-3">
+      <button type="button" onclick="toggleRawContent()" class="w-full text-left flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Raw Content</h3>
+        <svg class="w-5 h-5 text-gray-400 transform transition-transform" id="raw-content-arrow">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+    </div>
+    <div id="raw-content" class="hidden p-6">
+      <pre class="bg-gray-50 p-4 rounded text-sm overflow-auto max-h-96 border">{{ snapshot.content_text }}</pre>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Navigation -->
+  <div class="mt-6 flex justify-between">
+    <a href="/monitors/{{ monitor.id }}" 
+       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back to Monitor
+    </a>
+    
+    {% if prev %}
+    <a href="/monitors/{{ monitor.id }}/snapshots/{{ prev.id }}" 
+       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Previous Snapshot
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Floating Diff Navigation Panel -->
+<div id="floating-diff-nav" class="fixed bottom-6 right-6 bg-white shadow-lg rounded-lg border border-gray-200 p-4 z-50 transition-all duration-300 transform translate-y-0" style="display: none;">
+  <div class="flex items-center space-x-3">
+    <button type="button" id="jump-prev-diff" class="floating-nav-btn bg-gray-100 hover:bg-gray-200 text-gray-700">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    
+    <div class="text-center">
+      <div id="floating-jump-counter" class="text-xs font-medium text-gray-600">-</div>
+      <div class="text-xs text-gray-400">changes</div>
+    </div>
+    
+    <button type="button" id="jump-next-diff" class="floating-nav-btn bg-blue-500 hover:bg-blue-600 text-white">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Close/minimize button -->
+  <button type="button" id="minimize-floating-nav" class="absolute -top-2 -right-2 bg-gray-200 hover:bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 text-xs">
+    ×
+  </button>
+</div>
+
+<!-- Minimized floating button -->
+<div id="minimized-floating-nav" class="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg z-50 cursor-pointer transition-all duration-300" style="display: none;">
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+  </svg>
+</div>
+
+<!-- Include the diff renderer JavaScript -->
+<script src="{{ url_for('static', filename='js/diff-render.js') }}"></script>
+
+<script>
+// Fallback diff renderer if main one fails
+function fallbackDiffRenderer() {
+    console.log('Using fallback diff renderer');
+    
+    const contentA = document.getElementById('diff-content-a')?.textContent || '';
+    const contentB = document.getElementById('diff-content-b')?.textContent || '';
+    const result = document.getElementById('diff-result');
+    
+    if (!result) return;
+    
+    // Check if jsdiff is available
+    if (typeof Diff === 'undefined') {
+        result.innerHTML = `
+            <div class="text-center text-red-500 py-8">
+                <div class="text-lg font-medium mb-2">Diff Library Not Available</div>
+                <div class="text-sm">Showing raw content differences:</div>
+                <div class="mt-4 p-4 bg-gray-100 rounded text-left text-sm max-h-64 overflow-auto">
+                    <div class="mb-2 font-medium">Previous:</div>
+                    <div class="mb-4 p-2 bg-red-50 border-l-4 border-red-400">${contentA.substring(0, 200)}...</div>
+                    <div class="mb-2 font-medium">Current:</div>
+                    <div class="p-2 bg-green-50 border-l-4 border-green-400">${contentB.substring(0, 200)}...</div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    try {
+        // Simple word diff
+        const diff = Diff.diffWords(contentA, contentB);
+        const fragment = document.createDocumentFragment();
+        let changeCount = 0;
+        
+        diff.forEach(part => {
+            let element;
+            if (part.removed) {
+                element = document.createElement('del');
+                element.className = 'bg-red-100 text-red-800 px-1 rounded line-through';
+                element.textContent = part.value;
+                changeCount++;
+            } else if (part.added) {
+                element = document.createElement('ins');
+                element.className = 'bg-green-100 text-green-800 px-1 rounded';
+                element.textContent = part.value;
+                changeCount++;
+            } else {
+                element = document.createTextNode(part.value);
+            }
+            fragment.appendChild(element);
+        });
+        
+        result.innerHTML = '';
+        result.appendChild(fragment);
+        
+        // Update counter
+        const counter = document.getElementById('diff-counter');
+        const floatingCounter = document.getElementById('floating-jump-counter');
+        if (counter) {
+            counter.textContent = `${changeCount} changes`;
+        }
+        if (floatingCounter && changeCount > 0) {
+            floatingCounter.textContent = `1 of ${changeCount}`;
+            // Show floating nav for fallback
+            const floatingNav = document.getElementById('floating-diff-nav');
+            if (floatingNav) floatingNav.style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Fallback diff error:', error);
+        result.innerHTML = `
+            <div class="text-center text-red-500 py-8">
+                <div class="text-lg font-medium mb-2">Error Processing Diff</div>
+                <div class="text-sm">Error: ${error.message}</div>
+                <div class="mt-4 text-xs text-gray-600">Check browser console for details</div>
+            </div>
+        `;
+    }
+}
+
+// Additional helper functions
+function toggleRawContent() {
+    const content = document.getElementById('raw-content');
+    const arrow = document.getElementById('raw-content-arrow');
+    
+    if (content && content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    } else if (content) {
+        content.classList.add('hidden');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Initialize diff display when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Diff page loaded, initializing...');
+    
+    // If main diff renderer isn't available after 2 seconds, use fallback
+    setTimeout(function() {
+        if (!window.diffRenderer || !document.querySelector('#diff-result .diff-display')) {
+            console.log('Main diff renderer not working, using fallback');
+            fallbackDiffRenderer();
+        }
+    }, 2000);
+});
+</script>
+
+</div>
+{% endblock %}

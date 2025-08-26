@@ -1,0 +1,642 @@
+{% extends 'base.html' %}
+{% block content %}
+<!-- Professional Status Bar -->
+{% if monitors|length > 0 %}
+<div class="bg-prime-teal text-white px-6 py-3">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex items-center justify-center">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="font-medium">
+        Actively monitoring {{ monitors|length }} website{{ 's' if monitors|length != 1 else '' }} for critical changes
+      </span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Professional Hero Section - Collapsible -->
+<div class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6">
+    <!-- Collapsible Header -->
+    <div class="py-4 cursor-pointer" onclick="toggleHeroSection()">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-prime-navy">
+          WE PROVIDE THE MONITORING. YOU FOCUS ON YOUR BUSINESS.
+        </h1>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm text-prime-gray">Quick Add Monitor</span>
+          <svg id="heroChevron" class="w-5 h-5 text-prime-gray transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Collapsible Content -->
+    <div id="heroContent" class="pb-8 transition-all duration-300 ease-in-out overflow-hidden">
+      <div class="text-center mb-8">
+        <p class="text-lg text-prime-gray max-w-3xl mx-auto">
+          Professional-grade website monitoring solutions designed for businesses that need reliable, 
+          automated change detection and alerts for their critical web resources.
+        </p>
+      </div>
+      
+      <!-- Quick Add Monitor Form -->
+      <div class="bg-prime-light border border-gray-200 rounded-lg p-6 max-w-4xl mx-auto">
+        <h2 class="text-xl font-semibold text-prime-navy mb-4">Add New Website Monitor</h2>
+        <form method="post" action="/" class="space-y-4">
+          <div class="flex gap-3">
+            <input type="url" name="url" placeholder="https://example.com" required
+                   class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-prime-blue focus:border-prime-blue">
+            <button type="submit" class="bg-prime-blue hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors">
+              Start Monitoring
+            </button>
+            <a href="/monitors/new" class="bg-prime-navy hover:bg-slate-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+              Advanced Setup
+            </a>
+          </div>
+          
+          <!-- Group Tag -->
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-prime-navy">Group Tag:</label>
+            <input type="text" placeholder="e.g., Production, API, Critical" 
+                   class="px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-prime-blue focus:border-prime-blue">
+          </div>
+          
+          <!-- Monitor Type -->
+          <div class="flex items-center text-sm text-prime-gray">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Monitoring: Webpage Content (Words, Lines, Paragraphs, Characters), HTML, JSON and PDF Changes</span>
+            <input type="hidden" name="watch_type" value="webpage">
+          </div>
+          
+          <!-- Professional Tip -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-prime-blue mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <div class="text-sm">
+                <p class="font-medium text-prime-navy">Professional Tip:</p>
+                <p class="text-prime-gray">Set up shared monitoring dashboards and configure custom alerts for your team. <a href="#" class="text-prime-blue hover:underline">Learn more</a></p>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Professional Management Toolbar -->
+{% if monitors|length > 0 %}
+<div class="bg-white border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6 py-4">
+    <form id="bulkActionForm" method="post" action="/bulk-actions">
+      <div class="flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex flex-wrap gap-2">
+          <button type="submit" name="action" value="pause" class="bg-gray-100 hover:bg-gray-200 text-prime-navy px-4 py-2 rounded-lg text-sm flex items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled id="pauseBtn">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Pause Selected
+          </button>
+          <button type="submit" name="action" value="unpause" class="bg-prime-teal hover:bg-cyan-600 text-white px-4 py-2 rounded-lg text-sm flex items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled id="unpauseBtn">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293H15M9 10v4a2 2 0 002 2h2a2 2 0 002-2v-4m-6 0V6a2 2 0 012-2h2a2 2 0 012 2v4"/>
+            </svg>
+            Resume Selected
+          </button>
+          <button type="submit" name="action" value="recheck" class="bg-prime-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled id="recheckBtn">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Recheck Selected
+          </button>
+          <button type="submit" name="action" value="delete" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm flex items-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled id="deleteBtn" onclick="return confirm('Delete selected monitors?')">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Delete Selected
+          </button>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <span id="selectedCount" class="text-sm text-prime-gray">0 monitors selected</span>
+          <div class="flex gap-2">
+            <button type="button" onclick="recheckAll()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm flex items-center transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Recheck All
+            </button>
+            <button type="button" onclick="markAllViewed()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm flex items-center transition-colors">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              Mark All Viewed
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional Filter Navigation -->
+<div class="bg-prime-light border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-6">
+    <nav class="flex space-x-8">
+      <button type="button" id="tab-all" class="py-4 px-1 text-sm font-medium border-b-2 border-prime-blue text-prime-blue tab-button active">
+        All Monitors
+      </button>
+      <button type="button" id="tab-active" class="py-4 px-1 text-sm font-medium text-prime-gray hover:text-prime-blue transition-colors tab-button">
+        Active
+      </button>
+      <button type="button" id="tab-paused" class="py-4 px-1 text-sm font-medium text-prime-gray hover:text-prime-blue transition-colors tab-button">
+        Paused
+      </button>
+      <button type="button" id="tab-changes" class="py-4 px-1 text-sm font-medium text-prime-gray hover:text-prime-blue transition-colors tab-button">
+        Changes Detected
+      </button>
+      <button type="button" id="tab-errors" class="py-4 px-1 text-sm font-medium text-prime-gray hover:text-prime-blue transition-colors tab-button">
+        Errors
+      </button>
+    </nav>
+  </div>
+</div>
+{% endif %}
+
+<!-- Professional Dashboard Content -->
+<div class="max-w-7xl mx-auto px-6 py-8">
+  {% if monitors %}
+  <!-- Professional Monitors Management Table -->
+  <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+    <div class="px-6 py-4 border-b border-gray-200 bg-prime-light">
+      <h3 class="text-lg font-semibold text-prime-navy">Website Monitors</h3>
+      <p class="text-sm text-prime-gray mt-1">Manage and monitor your critical web resources</p>
+    </div>
+    
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">
+            <input type="checkbox" class="rounded border-gray-300 text-prime-blue focus:ring-prime-blue" id="selectAll" onchange="toggleSelectAll()">
+          </th>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">ID</th>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">
+            <div class="flex items-center space-x-2">
+              <span>Status</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">Website & Configuration</th>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">Last Checked</th>
+          <th class="px-6 py-4 text-left text-xs font-semibold text-prime-navy uppercase tracking-wider">
+            <div class="flex items-center">
+              <span>Last Changed</span>
+              <svg class="inline w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </div>
+          </th>
+          <th class="px-6 py-4 text-right text-xs font-semibold text-prime-navy uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for m in monitors %}
+        <tr class="hover:bg-gray-50 monitor-row" 
+            data-status="{{ 'paused' if m.is_paused else ('active' if m.active else 'inactive') }}"
+            data-has-changes="{{ 'true' if m.snapshots | selectattr('change_count', '>', 0) | list | length > 0 else 'false' }}"
+            data-has-errors="{{ 'true' if m.snapshots | selectattr('error_message', 'ne', None) | list | length > 0 else 'false' }}">
+          <td class="px-4 py-4">
+            <input type="checkbox" class="rounded monitor-checkbox" name="monitor_ids" value="{{ m.id }}">
+          </td>
+          <td class="px-4 py-4 text-sm text-gray-900">{{ loop.index }}</td>
+          <td class="px-4 py-4">
+            <div class="flex items-center space-x-1">
+              {% if m.active %}
+                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+              {% else %}
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+              {% endif %}
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728"/>
+              </svg>
+            </div>
+          </td>
+          <td class="px-4 py-4">
+            <div class="flex items-center">
+              <div class="flex-1 min-w-0">
+                <a href="/monitors/{{ m.id }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 truncate block">
+                  {{ m.url }}
+                </a>
+                {% if m.name != m.url %}
+                <p class="text-xs text-gray-500 truncate">{{ m.name }}</p>
+                {% endif %}
+              </div>
+              <div class="ml-4 flex items-center space-x-1">
+                <a href="{{ m.url }}" target="_blank" class="text-gray-400 hover:text-gray-600">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </td>
+          <td class="px-4 py-4 text-sm text-gray-500">
+            {% if m.last_checked %}
+              {{ (m.last_checked|local).strftime('%b %d, %Y at %H:%M') }}
+            {% else %}
+              Never
+            {% endif %}
+          </td>
+          <td class="px-4 py-4 text-sm text-gray-500">
+            {% set latest_snapshot = m.snapshots | selectattr('change_count', '>', 0) | first %}
+            {% if latest_snapshot %}
+              {{ (latest_snapshot.created_at|local).strftime('%b %d, %Y at %H:%M') }}
+            {% else %}
+              Never
+            {% endif %}
+          </td>
+          <td class="px-4 py-4 text-right text-sm font-medium space-x-2">
+            <form method="post" action="/monitors/{{ m.id }}/check" class="inline">
+              <button class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                Recheck
+              </button>
+            </form>
+            <a href="/monitors/{{ m.id }}/edit" class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">
+              Edit
+            </a>
+            <a href="/monitors/{{ m.id }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs">
+              History
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Bulk Actions Footer -->
+  <div class="mt-4 flex justify-between items-center text-sm text-gray-600">
+    <div class="flex items-center space-x-4">
+      <label class="flex items-center">
+        <input type="checkbox" class="rounded mr-2">
+        <span>Mark all viewed</span>
+      </label>
+      <button class="text-blue-600 hover:text-blue-800">Recheck all</button>
+    </div>
+  </div>
+  </form>
+
+  {% else %}
+  <!-- Professional Empty State -->
+  <div class="bg-white rounded-lg shadow-lg border border-gray-200 text-center py-16 px-8">
+    <div class="max-w-md mx-auto">
+      <div class="w-16 h-16 bg-prime-blue rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-prime-navy mb-3">Start Professional Monitoring</h3>
+      <p class="text-prime-gray mb-8 leading-relaxed">
+        Begin monitoring your critical web resources with enterprise-grade change detection. 
+        Set up your first monitor to get real-time alerts when content changes.
+      </p>
+      <div class="space-y-4">
+        <a href="/monitors/new" class="inline-flex items-center px-6 py-3 bg-prime-blue text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
+          Create Your First Monitor
+        </a>
+        <div class="text-sm text-prime-gray">
+          <p>Professional features: Custom headers • Advanced filtering • JSON monitoring • PDF tracking</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+// Hero section toggle functionality - define first for immediate availability
+window.toggleHeroSection = function() {
+  const content = document.getElementById('heroContent');
+  const chevron = document.getElementById('heroChevron');
+  
+  if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+    // Collapse
+    content.style.maxHeight = '0px';
+    content.style.paddingBottom = '0px';
+    chevron.style.transform = 'rotate(-90deg)';
+  } else {
+    // Expand
+    content.style.maxHeight = content.scrollHeight + 'px';
+    content.style.paddingBottom = '2rem';
+    chevron.style.transform = 'rotate(0deg)';
+  }
+};
+
+// Initialize hero section as collapsed
+window.initHeroSection = function() {
+  const content = document.getElementById('heroContent');
+  const chevron = document.getElementById('heroChevron');
+  
+  if (content && chevron) {
+    // Start collapsed
+    content.style.maxHeight = '0px';
+    content.style.paddingBottom = '0px';
+    chevron.style.transform = 'rotate(-90deg)';
+  }
+};
+
+// Add CSS for tab states
+const style = document.createElement('style');
+style.textContent = `
+  .tab-button {
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  .tab-button.active {
+    border-bottom-color: #1e40af !important;
+    color: #1e40af !important;
+  }
+  .tab-button:not(.active):hover {
+    color: #1e40af;
+  }
+`;
+document.head.appendChild(style);
+
+// Bulk action functionality
+function toggleSelectAll() {
+  const selectAll = document.getElementById('selectAll');
+  const monitorCheckboxes = document.querySelectorAll('.monitor-checkbox');
+  
+  monitorCheckboxes.forEach(checkbox => {
+    const row = checkbox.closest('tr');
+    // Only toggle visible checkboxes
+    if (row && row.style.display !== 'none') {
+      checkbox.checked = selectAll.checked;
+    }
+  });
+  
+  updateButtonStates();
+}
+
+function updateButtonStates() {
+  // Debug: log all checkboxes
+  const allCheckboxes = document.querySelectorAll('.monitor-checkbox');
+  console.log('🔍 All checkboxes found:', allCheckboxes.length);
+  
+  // Only consider checkboxes in visible rows (not hidden by filters)
+  const visibleCheckboxes = document.querySelectorAll('.monitor-checkbox');
+  const selectedCheckboxes = [];
+  
+  visibleCheckboxes.forEach(checkbox => {
+    const row = checkbox.closest('tr');
+    console.log('🔍 Checkbox:', checkbox.value, 'Checked:', checkbox.checked, 'Row visible:', row && row.style.display !== 'none');
+    if (checkbox.checked && row && row.style.display !== 'none') {
+      selectedCheckboxes.push(checkbox);
+    }
+  });
+  
+  const hasSelection = selectedCheckboxes.length > 0;
+  const count = selectedCheckboxes.length;
+  
+  console.log('🔍 Selected count:', count, 'Has selection:', hasSelection);
+  
+  // Enable/disable bulk action buttons
+  const pauseBtn = document.getElementById('pauseBtn');
+  const unpauseBtn = document.getElementById('unpauseBtn');
+  const recheckBtn = document.getElementById('recheckBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  
+  if (pauseBtn) pauseBtn.disabled = !hasSelection;
+  if (unpauseBtn) unpauseBtn.disabled = !hasSelection;
+  if (recheckBtn) recheckBtn.disabled = !hasSelection;
+  if (deleteBtn) deleteBtn.disabled = !hasSelection;
+  
+  // Update counter text
+  const counterText = count === 0 ? '0 monitors selected' : 
+                     count === 1 ? '1 monitor selected' : 
+                     `${count} monitors selected`;
+  const selectedCountEl = document.getElementById('selectedCount');
+  if (selectedCountEl) selectedCountEl.textContent = counterText;
+  
+  console.log('🔍 Updated counter:', counterText);
+}
+
+// Listen for individual checkbox changes
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 Initializing page...');
+  
+  // Initialize hero section as collapsed
+  initHeroSection();
+  
+  // Initialize checkbox event listeners
+  const monitorCheckboxes = document.querySelectorAll('.monitor-checkbox');
+  console.log('🔍 Found checkboxes:', monitorCheckboxes.length);
+  
+  monitorCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', updateButtonStates);
+  });
+  
+  // Initialize tab filtering
+  initTabFiltering();
+  
+  // Initial state
+  updateButtonStates();
+  
+  console.log('✅ Page initialization complete');
+});
+
+// Bulk action handlers
+function pauseSelected() {
+  const form = document.getElementById('bulkActionForm');
+  document.getElementById('actionType').value = 'pause';
+  form.submit();
+}
+
+function unpauseSelected() {
+  const form = document.getElementById('bulkActionForm');
+  document.getElementById('actionType').value = 'unpause';
+  form.submit();
+}
+
+function recheckSelected() {
+  const form = document.getElementById('bulkActionForm');
+  document.getElementById('actionType').value = 'recheck';
+  form.submit();
+}
+
+function deleteSelected() {
+  if (confirm('Are you sure you want to delete the selected monitors?')) {
+    const form = document.getElementById('bulkActionForm');
+    document.getElementById('actionType').value = 'delete';
+    form.submit();
+  }
+}
+
+function recheckAll() {
+  if (confirm('Recheck all monitors now?')) {
+    window.location.href = '/recheck-all';
+  }
+}
+
+function markAllViewed() {
+  if (confirm('Mark all monitors as viewed?')) {
+    window.location.href = '/mark-all-viewed';
+  }
+}
+
+function checkNow(monitorId) {
+  if (confirm('Check this monitor now?')) {
+    window.location.href = `/monitors/${monitorId}/check`;
+  }
+}
+
+// Tab filtering functionality
+function initTabFiltering() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+  const monitorRows = document.querySelectorAll('.monitor-row');
+  
+  // Add click event listeners to tab buttons
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      console.log('🎯 Tab clicked:', this.id);
+      
+      // Remove active state from all tabs
+      tabButtons.forEach(tab => {
+        tab.classList.remove('active', 'border-prime-blue', 'text-prime-blue');
+        tab.classList.add('text-prime-gray');
+      });
+      
+      // Add active state to clicked tab
+      this.classList.add('active', 'border-prime-blue', 'text-prime-blue');
+      this.classList.remove('text-prime-gray');
+      
+      // Get filter type from button ID
+      const filterType = this.id.replace('tab-', '');
+      console.log('🔍 Filter type:', filterType);
+      
+      // Filter monitors based on tab
+      filterMonitors(filterType);
+      
+      // Update bulk action checkboxes
+      updateButtonStates();
+      
+      console.log('✅ Tab filtering complete for:', filterType);
+    });
+  });
+}
+
+function filterMonitors(filterType) {
+  console.log('🔍 Filtering monitors by:', filterType);
+  const monitorRows = document.querySelectorAll('.monitor-row');
+  console.log('🔍 Found monitor rows:', monitorRows.length);
+  let visibleCount = 0;
+  
+  monitorRows.forEach(row => {
+    let shouldShow = false;
+    const rowStatus = row.dataset.status;
+    console.log('🔍 Row status:', rowStatus, 'Filter:', filterType);
+    
+    switch(filterType) {
+      case 'all':
+        shouldShow = true;
+        break;
+      case 'active':
+        shouldShow = row.dataset.status === 'active';
+        break;
+      case 'paused':
+        shouldShow = row.dataset.status === 'paused';
+        break;
+      case 'changes':
+        shouldShow = row.dataset.hasChanges === 'true';
+        break;
+      case 'errors':
+        shouldShow = row.dataset.hasErrors === 'true';
+        break;
+    }
+    
+    console.log('🔍 Should show row:', shouldShow);
+    
+    if (shouldShow) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+      // Uncheck hidden checkboxes
+      const checkbox = row.querySelector('.monitor-checkbox');
+      if (checkbox) checkbox.checked = false;
+    }
+  });
+  
+  console.log('🔍 Visible count after filtering:', visibleCount);
+  
+  // Update empty state
+  updateEmptyState(visibleCount, filterType);
+  
+  // Update button states after filtering
+  updateButtonStates();
+}
+
+function updateEmptyState(visibleCount, filterType) {
+  const tableContainer = document.querySelector('.bg-white.shadow-lg.rounded-lg');
+  let existingEmptyState = document.querySelector('.filter-empty-state');
+  
+  if (visibleCount === 0) {
+    // Show empty state
+    if (!existingEmptyState) {
+      const emptyState = document.createElement('div');
+      emptyState.className = 'filter-empty-state text-center py-12 px-6 text-gray-500';
+      
+      let message = '';
+      switch(filterType) {
+        case 'active':
+          message = 'No active monitors found';
+          break;
+        case 'paused':
+          message = 'No paused monitors found';
+          break;
+        case 'changes':
+          message = 'No monitors with changes detected';
+          break;
+        case 'errors':
+          message = 'No monitors with errors found';
+          break;
+        default:
+          message = 'No monitors found';
+      }
+      
+      emptyState.innerHTML = `
+        <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        <h3 class="text-lg font-medium mb-2">${message}</h3>
+        <p class="text-sm">Try selecting a different filter or add new monitors.</p>
+      `;
+      
+      tableContainer.appendChild(emptyState);
+    }
+  } else {
+    // Remove empty state
+    if (existingEmptyState) {
+      existingEmptyState.remove();
+    }
+  }
+}
+
+</script>
+
+{% endblock %}

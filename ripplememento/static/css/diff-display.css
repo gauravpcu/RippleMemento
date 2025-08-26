@@ -1,0 +1,438 @@
+/**
+ * Diff Display Styles (changedetection.io inspired)
+ * Optimized for visual highlighting and user experience
+ */
+
+/* Base diff display container */
+.diff-display {
+    font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    padding: 1.5rem;
+    background: #fafafa;
+    border-radius: 8px;
+    min-height: 200px;
+    border: 1px solid #e5e7eb;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    /* Ensure consistent tab stops for tabular data */
+    tab-size: 4;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    /* Better visibility for tabs in diff display */
+    -webkit-tab-size: 4;
+}
+
+/* Diff mode specific styling */
+.diff-display.words-diff {
+    line-height: 1.8;
+}
+
+.diff-display.lines-diff {
+    line-height: 1.4;
+    font-size: 13px;
+}
+
+.diff-display.chars-diff {
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+}
+
+.diff-display.json-diff {
+    font-size: 13px;
+    line-height: 1.6;
+    background: #f8f9fa;
+}
+
+/* Base change element styling */
+.diff-change {
+    padding: 2px 4px;
+    margin: 0 1px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline;
+    /* Preserve tabs and spacing in change elements */
+    white-space: pre-wrap;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+}
+
+/* Ensure all child spans also preserve tabs */
+.diff-change span,
+.diff-display span {
+    white-space: pre-wrap;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    -webkit-tab-size: 4;
+}
+
+/* Optional: Add subtle visual indicator for tab characters when needed */
+.diff-display.show-tabs span:not(.diff-change span) {
+    /* Show tab characters as subtle dots when in tab-visible mode */
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent calc(4ch - 1px),
+        rgba(200, 200, 200, 0.3) calc(4ch - 1px),
+        rgba(200, 200, 200, 0.3) 4ch
+    );
+}
+
+/* Added content styling (like changedetection.io) */
+.diff-added {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    text-decoration: none;
+    border-left: 3px solid #28a745;
+    box-shadow: 0 1px 3px rgba(40, 167, 69, 0.2);
+}
+
+.diff-added:hover {
+    background: linear-gradient(135deg, #c3e6cb 0%, #b8dac0 100%);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Removed content styling (like changedetection.io) */
+.diff-removed {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    text-decoration: line-through;
+    border-left: 3px solid #dc3545;
+    box-shadow: 0 1px 3px rgba(220, 53, 69, 0.2);
+}
+
+.diff-removed:hover {
+    background: linear-gradient(135deg, #f5c6cb 0%, #f1b0b7 100%);
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+    transform: translateY(-1px);
+}
+
+/* Active highlight for navigation */
+.diff-highlight {
+    animation: highlightPulse 1.5s ease-in-out;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4) !important;
+    border-radius: 6px !important;
+    z-index: 10;
+    position: relative;
+}
+
+@keyframes highlightPulse {
+    0% { 
+        box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.8);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.4);
+        transform: scale(1.02);
+    }
+    100% { 
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.4);
+        transform: scale(1);
+    }
+}
+
+/* Line-specific styling */
+.lines-diff .diff-change {
+    display: block;
+    margin: 2px 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border-left-width: 4px;
+}
+
+/* Character-specific styling */
+.chars-diff .diff-change {
+    padding: 1px 2px;
+    margin: 0 0.5px;
+    font-weight: 700;
+}
+
+/* JSON-specific styling */
+.json-diff .diff-change {
+    display: inline-block;
+    margin: 1px;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+
+/* Settings panel styling */
+#diff-settings {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#diff-settings input[type="radio"],
+#diff-settings input[type="checkbox"] {
+    accent-color: #3b82f6;
+    margin-right: 6px;
+}
+
+#diff-settings label {
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+}
+
+#diff-settings label:hover {
+    color: #3b82f6;
+}
+
+/* Navigation buttons */
+.diff-nav-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.diff-nav-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+}
+
+.diff-nav-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.diff-nav-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Floating navigation styles */
+.floating-nav-btn {
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.floating-nav-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.floating-nav-btn:active {
+    transform: translateY(0);
+}
+
+.floating-nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Floating panel animations */
+#floating-diff-nav {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.95);
+    min-width: 200px;
+    max-width: 250px;
+}
+
+#floating-diff-nav.hidden {
+    transform: translateY(100px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+#minimized-floating-nav {
+    backdrop-filter: blur(8px);
+}
+
+#minimized-floating-nav:hover {
+    transform: scale(1.1);
+}
+
+/* Ensure floating nav doesn't block content */
+@media (max-width: 768px) {
+    #floating-diff-nav {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    #minimized-floating-nav {
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+/* Add some padding to bottom of page to prevent floating nav from covering content */
+body {
+    padding-bottom: 6rem;
+}
+
+/* Counter styling */
+#diff-counter {
+    background: #f3f4f6;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid #d1d5db;
+}
+
+#jump-counter {
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #bfdbfe;
+}
+
+/* Loading states */
+.diff-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}
+
+.diff-loading .spinner {
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Empty state styling */
+.diff-empty {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 2px dashed #d1d5db;
+}
+
+.diff-empty svg {
+    color: #9ca3af;
+    margin-bottom: 12px;
+}
+
+/* Error state styling */
+.diff-error {
+    text-align: center;
+    padding: 40px;
+    color: #dc2626;
+    background: #fef2f2;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .diff-display {
+        font-size: 12px;
+        padding: 1rem;
+    }
+    
+    #diff-settings {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    #diff-settings .flex {
+        flex-wrap: wrap;
+    }
+    
+    .diff-nav-btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .diff-display {
+        background: #1f2937;
+        color: #e5e7eb;
+        border-color: #374151;
+    }
+    
+    .diff-added {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        color: #a7f3d0;
+        border-left-color: #10b981;
+    }
+    
+    .diff-removed {
+        background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+        color: #fca5a5;
+        border-left-color: #ef4444;
+    }
+    
+    #diff-settings {
+        background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+        border-color: #6b7280;
+        color: #e5e7eb;
+    }
+}
+
+/* Print styles */
+@media print {
+    .diff-display {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
+    
+    .diff-added {
+        background: #e8f5e8 !important;
+        color: #2d5a2d !important;
+        border-left: 3px solid #4caf50 !important;
+    }
+    
+    .diff-removed {
+        background: #ffeaea !important;
+        color: #8b0000 !important;
+        border-left: 3px solid #f44336 !important;
+    }
+    
+    .diff-highlight {
+        box-shadow: none !important;
+        outline: 2px solid #000 !important;
+    }
+    
+    #diff-settings,
+    .diff-nav-btn {
+        display: none !important;
+    }
+}

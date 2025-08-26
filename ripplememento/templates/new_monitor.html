@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-6 bg-white border border-slate-200 rounded-lg p-6">
+  <h1 class="text-xl font-semibold mb-6">New Monitor</h1>
+  
+  <form method="post" class="space-y-8">
+    <!-- Basic Information -->
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium mb-1">Monitor Name</label>
+          <input name="name" class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" required />
+        </div>
+        
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium mb-1">URL to Monitor</label>
+          <input name="url" type="url" class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" required />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1">CSS Selector (optional)</label>
+          <input name="css_selector" placeholder="#main, .article, body" class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1">Check Interval (minutes)</label>
+          <input name="interval_minutes" type="number" min="1" value="30" class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Monitoring Style -->
+    <div class="border-t border-gray-200 pt-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Monitoring Style</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-2">Detection Method</label>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+            <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <input type="radio" name="monitor_style" value="words" checked class="sr-only">
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-900">Words</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-500">Most common</span>
+                </span>
+              </span>
+              <svg class="h-5 w-5 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </label>
+
+            <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <input type="radio" name="monitor_style" value="lines" class="sr-only">
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-900">Lines</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-500">Line changes</span>
+                </span>
+              </span>
+              <svg class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </label>
+
+            <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <input type="radio" name="monitor_style" value="paragraphs" class="sr-only">
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-900">Paragraphs</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-500">Content blocks</span>
+                </span>
+              </span>
+              <svg class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </label>
+
+            <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <input type="radio" name="monitor_style" value="chars" class="sr-only">
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-900">Characters</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-500">Very sensitive</span>
+                </span>
+              </span>
+              <svg class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </label>
+
+            <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none">
+              <input type="radio" name="monitor_style" value="json" class="sr-only">
+              <span class="flex flex-1">
+                <span class="flex flex-col">
+                  <span class="block text-sm font-medium text-gray-900">JSON</span>
+                  <span class="mt-1 flex items-center text-sm text-gray-500">API responses</span>
+                </span>
+              </span>
+              <svg class="h-5 w-5 text-indigo-600 hidden" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="flex items-center">
+            <input id="ignore_whitespace" name="ignore_whitespace" type="checkbox" checked class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+            <label for="ignore_whitespace" class="ml-2 block text-sm text-gray-900">Ignore Whitespace</label>
+          </div>
+          
+          <div class="flex items-center">
+            <input id="ignore_case" name="ignore_case" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+            <label for="ignore_case" class="ml-2 block text-sm text-gray-900">Ignore Case</label>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium mb-1">Min Changes to Trigger</label>
+            <input name="trigger_threshold" type="number" min="1" value="1" class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Filtering -->
+    <div class="border-t border-gray-200 pt-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Advanced Filtering (Optional)</h3>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div>
+          <label class="block text-sm font-medium mb-1">Ignore Text Patterns</label>
+          <textarea name="ignore_text" rows="3" 
+                    class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Copyright 2024&#10;Last updated&#10;Advertisement"></textarea>
+          <p class="mt-1 text-sm text-gray-500">One pattern per line. These will be ignored in change detection.</p>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium mb-1">Trigger Only On</label>
+          <textarea name="trigger_text" rows="3" 
+                    class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Error&#10;Update&#10;New Version"></textarea>
+          <p class="mt-1 text-sm text-gray-500">Only trigger when these words appear in changes.</p>
+        </div>
+        
+        <div class="sm:col-span-2">
+          <label class="block text-sm font-medium mb-1">Custom Headers (JSON)</label>
+          <textarea name="custom_headers" rows="3" 
+                    class="w-full rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder='{"Authorization": "Bearer token", "User-Agent": "Custom Agent"}'></textarea>
+          <p class="mt-1 text-sm text-gray-500">Custom HTTP headers for authentication or special requests.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-6 border-t border-gray-200">
+      <div class="flex justify-end space-x-3">
+        <a href="/" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</a>
+        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">Create Monitor</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+// Handle radio button selection visual feedback
+document.querySelectorAll('input[name="monitor_style"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    // Remove selected state from all labels
+    document.querySelectorAll('input[name="monitor_style"]').forEach(r => {
+      const label = r.closest('label');
+      const checkIcon = label.querySelector('svg');
+      label.classList.remove('ring-2', 'ring-indigo-500', 'border-indigo-500');
+      checkIcon.classList.add('hidden');
+    });
+    
+    // Add selected state to chosen option
+    const label = this.closest('label');
+    const checkIcon = label.querySelector('svg');
+    label.classList.add('ring-2', 'ring-indigo-500', 'border-indigo-500');
+    checkIcon.classList.remove('hidden');
+  });
+});
+
+// Initialize first option as selected
+document.querySelector('input[name="monitor_style"]:checked').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

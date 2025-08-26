@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RippleMemento - Professional Website Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'prime-blue': '#1e40af',
+            'prime-teal': '#0891b2',
+            'prime-navy': '#1e293b',
+            'prime-light': '#f8fafc',
+            'prime-gray': '#64748b'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Extra head block for child templates -->
+  {% block extra_head %}{% endblock %}
+  <style>
+    html, body { 
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; 
+    }
+    
+    /* Enhanced diff styling */
+    .diff-content {
+      line-height: 1.6;
+    }
+    
+    .diff-content p {
+      margin-bottom: 1rem;
+      padding: 0.5rem 0;
+    }
+    
+    /* Word diff specific styling */
+    .word-diff {
+      font-size: 14px;
+      line-height: 1.8;
+      padding: 1rem;
+      background: #fafafa;
+      border-radius: 6px;
+    }
+    
+    /* Character diff specific styling */
+    .char-diff {
+      font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    
+    .diff-content span[title="Added"] {
+      background-color: #dcfce7;
+      color: #166534;
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.25rem;
+      font-weight: 500;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    .diff-content span[title="Removed"] {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.25rem;
+      font-weight: 500;
+      text-decoration: line-through;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    
+    /* Enhanced styling for word count tooltips */
+    .diff-content span[title*="word(s)"] {
+      border-left: 3px solid;
+      padding-left: 0.5rem;
+      margin: 0 2px;
+    }
+    
+    /* Enhanced styling for character count tooltips */
+    .diff-content span[title*="character(s)"] {
+      font-weight: bold;
+      padding: 0.1rem 0.3rem;
+      margin: 0 1px;
+      border: 1px solid;
+    }
+    
+    .diff-content span[title="Added"]:before {
+      content: "";
+      position: absolute;
+      left: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.25rem;
+      height: 100%;
+      background-color: #22c55e;
+      border-radius: 0.125rem;
+    }
+    
+    .diff-content span[title="Removed"]:before {
+      content: "";
+      position: absolute;
+      left: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0.25rem;
+      height: 100%;
+      background-color: #ef4444;
+      border-radius: 0.125rem;
+    }
+    
+    /* Paragraph and line diff styling */
+    .diff-content div[class*="border-l-4"], 
+    .diff-content p[class*="border-l-4"] {
+      position: relative;
+      margin: 0.5rem 0;
+      transition: all 0.2s ease;
+    }
+    
+    .diff-content div[class*="border-l-4"]:hover,
+    .diff-content p[class*="border-l-4"]:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Active change highlighting for navigation */
+    .diff-change-active {
+      animation: diffHighlight 1s ease-in-out;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+      border-radius: 0.375rem;
+    }
+    
+    @keyframes diffHighlight {
+      0% { box-shadow: 0 0 0 0px rgba(59, 130, 246, 0.7); }
+      50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.3); }
+      100% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+    }
+    
+    /* Keyboard shortcuts indicator */
+    .keyboard-shortcuts {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
+    .keyboard-shortcuts.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-prime-light text-prime-navy">{%- raw -%}
+  <!-- Navigation Header -->
+  <nav class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="flex items-center">
+            <div class="w-8 h-8 bg-prime-blue rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <h1 class="ml-3 text-xl font-bold text-prime-navy">RippleMemento</h1>
+          </div>
+          <div class="hidden md:block text-sm text-prime-gray">
+            Professional Website Monitoring Solutions
+          </div>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/" class="text-prime-gray hover:text-prime-blue transition-colors">Dashboard</a>
+          <a href="/monitors/new" class="bg-prime-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            New Monitor
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+{%- endraw %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-6 py-2">
+          {% for category, message in messages %}
+            <div class="px-3 py-2 rounded text-sm {{ 'text-green-800 bg-green-50' if category=='success' else 'text-amber-800 bg-amber-50' }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
+  
+  {% block content %}{% endblock %}
+
+  <footer class="bg-prime-navy text-white">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="md:col-span-2">
+          <div class="flex items-center mb-4">
+            <div class="w-8 h-8 bg-prime-teal rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+            </div>
+            <h3 class="ml-3 text-lg font-bold">RippleMemento</h3>
+          </div>
+          <p class="text-gray-300 text-sm leading-relaxed">
+            Professional website monitoring solutions for businesses and organizations. 
+            Stay informed of critical changes with reliable, automated monitoring technology.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Monitoring Solutions</h4>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li><a href="/" class="hover:text-white transition-colors">Website Monitoring</a></li>
+            <li><a href="/" class="hover:text-white transition-colors">Content Changes</a></li>
+            <li><a href="/" class="hover:text-white transition-colors">JSON Tracking</a></li>
+            <li><a href="/" class="hover:text-white transition-colors">PDF Monitoring</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">Support</h4>
+          <ul class="space-y-2 text-sm text-gray-300">
+            <li><a href="#" class="hover:text-white transition-colors">Documentation</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Help Center</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">Contact Support</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">System Status</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
+        © {{ 2025 }} RippleMemento. Professional Website Monitoring Technology.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

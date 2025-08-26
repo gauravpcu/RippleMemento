@@ -1,0 +1,2 @@
+FLASK_APP=ripplememento
+FLASK_ENV=development

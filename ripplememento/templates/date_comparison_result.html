@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<!-- Include external libraries and styles -->
+<script src="https://cdn.jsdelivr.net/npm/diff@5.1.0/dist/diff.min.js"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/diff-display.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-6 py-8">
+<div class="mt-6">
+  <div class="mb-6">
+    <nav class="flex items-center text-sm text-gray-500 space-x-2">
+      <a href="/" class="hover:text-gray-700">Dashboard</a>
+      <span>&gt;</span>
+      <a href="/monitors/{{ monitor.id }}" class="hover:text-gray-700">{{ monitor.name }}</a>
+      <span>&gt;</span>
+      <a href="/monitors/{{ monitor.id }}/compare" class="hover:text-gray-700">Date Comparison</a>
+      <span>&gt;</span>
+      <span class="text-gray-900">Results</span>
+    </nav>
+  </div>
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">
+        Date Range Comparison Results
+      </h1>
+      <div class="mt-1 text-sm text-gray-500">
+        {{ monitor.name }} • {{ start_date[:10] }} to {{ end_date[:10] }}
+        {% if change_count > 0 %}
+        • <span class="text-blue-600 font-medium">{{ change_count }} changes detected</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Summary -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"/>
+          </svg>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Total Snapshots</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ total_snapshots }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Changes Detected</dt>
+            <dd class="text-lg font-semibold text-gray-900">{{ change_count }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-8 w-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-5 w-0 flex-1">
+          <dl>
+            <dt class="text-sm font-medium text-gray-500 truncate">Time Range</dt>
+            <dd class="text-lg font-semibold text-gray-900">
+              {% set start_dt = first_snapshot.created_at %}
+              {% set end_dt = last_snapshot.created_at %}
+              {% set time_diff = (end_dt - start_dt).total_seconds() %}
+              {% if time_diff < 3600 %}
+                {{ "%.0f"|format(time_diff / 60) }} min
+              {% elif time_diff < 86400 %}
+                {{ "%.1f"|format(time_diff / 3600) }} hours
+              {% else %}
+                {{ "%.1f"|format(time_diff / 86400) }} days
+              {% endif %}
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snapshot Details -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-green-50 border-b border-green-200">
+        <h3 class="text-lg font-medium text-green-900">Start Snapshot</h3>
+        <p class="text-sm text-green-700">{{ first_snapshot.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+      </div>
+      <div class="p-6">
+        <div class="text-sm text-gray-600">
+          <strong>Content Hash:</strong> 
+          <code class="text-xs">{{ first_snapshot.content_hash[:12] if first_snapshot.content_hash }}...</code>
+        </div>
+        <div class="mt-2 text-sm text-gray-500 max-h-32 overflow-auto">
+          {{ first_snapshot.content_text[:200] if first_snapshot.content_text }}...
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-blue-50 border-b border-blue-200">
+        <h3 class="text-lg font-medium text-blue-900">End Snapshot</h3>
+        <p class="text-sm text-blue-700">{{ last_snapshot.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+      </div>
+      <div class="p-6">
+        <div class="text-sm text-gray-600">
+          <strong>Content Hash:</strong> 
+          <code class="text-xs">{{ last_snapshot.content_hash[:12] if last_snapshot.content_hash }}...</code>
+        </div>
+        <div class="mt-2 text-sm text-gray-500 max-h-32 overflow-auto">
+          {{ last_snapshot.content_text[:200] if last_snapshot.content_text }}...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff Settings Panel -->
+  <div id="diff-settings" class="bg-gray-50 rounded-lg p-4 mb-6 border">
+    <div class="flex flex-wrap items-center gap-6" id="diff-form">
+      <div class="flex items-center space-x-3">
+        <strong class="text-sm font-medium text-gray-700">Diff Style:</strong>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffWords" class="mr-2"> Words
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffLines" class="mr-2" checked> Lines
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffChars" class="mr-2"> Chars
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="radio" name="diff_type" value="diffJson" class="mr-2"> JSON
+        </label>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors">
+          <input type="checkbox" id="ignoreWhitespace" name="ignoreWhitespace" class="mr-2"> Ignore Spaces
+        </label>
+        <label class="flex items-center text-sm cursor-pointer hover:text-blue-600 transition-colors" title="Preserve tab alignment for tabular data">
+          <input type="checkbox" id="preserveTabs" name="preserveTabs" class="mr-2" checked> Preserve Tabs
+        </label>
+      </div>
+      
+      <div class="flex items-center space-x-3">
+        <span id="jump-counter" class="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">-</span>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <span id="diff-counter" class="text-sm text-gray-600">0 changes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Diff Display -->
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="border-b bg-gray-50 px-4 py-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Content Differences</h3>
+        <div class="flex items-center space-x-4 text-xs text-gray-500">
+          <div class="flex items-center space-x-1">
+            <div class="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+            <span>Added</span>
+          </div>
+          <div class="flex items-center space-x-1">
+            <div class="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
+            <span>Removed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <!-- Hidden content divs for JavaScript diff processing -->
+      <div id="diff-content-a" style="display: none;">{{ first_snapshot.content_text or '' }}</div>
+      <div id="diff-content-b" style="display: none;">{{ last_snapshot.content_text or '' }}</div>
+      
+      <!-- Main diff result display area -->
+      <div id="diff-result" class="diff-display">
+        <div class="diff-loading">
+          <div class="spinner"></div>
+          <div>Calculating differences...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="mt-6 flex justify-between">
+    <a href="/monitors/{{ monitor.id }}/compare" 
+       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      New Comparison
+    </a>
+    
+    <a href="/monitors/{{ monitor.id }}" 
+       class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+      Back to Monitor
+    </a>
+  </div>
+</div>
+
+<!-- Floating Diff Navigation Panel -->
+<div id="floating-diff-nav" class="fixed bottom-6 right-6 bg-white shadow-lg rounded-lg border border-gray-200 p-4 z-50 transition-all duration-300 transform translate-y-0" style="display: none;">
+  <div class="flex items-center space-x-3">
+    <button type="button" id="jump-prev-diff" class="floating-nav-btn bg-gray-100 hover:bg-gray-200 text-gray-700">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    
+    <div class="text-center">
+      <div id="floating-jump-counter" class="text-xs font-medium text-gray-600">-</div>
+      <div class="text-xs text-gray-400">changes</div>
+    </div>
+    
+    <button type="button" id="jump-next-diff" class="floating-nav-btn bg-blue-500 hover:bg-blue-600 text-white">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+  
+  <button type="button" id="minimize-floating-nav" class="absolute -top-2 -right-2 bg-gray-200 hover:bg-gray-300 rounded-full w-6 h-6 flex items-center justify-center text-gray-600 text-xs">
+    ×
+  </button>
+</div>
+
+<div id="minimized-floating-nav" class="fixed bottom-6 right-6 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 shadow-lg z-50 cursor-pointer transition-all duration-300" style="display: none;">
+  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+  </svg>
+</div>
+
+<!-- Include the diff renderer JavaScript -->
+<script src="{{ url_for('static', filename='js/diff-render.js') }}"></script>
+
+</div>
+{% endblock %}

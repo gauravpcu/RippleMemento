@@ -1,0 +1,123 @@
+{% extends 'base_enhanced.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="md:grid md:grid-cols-3 md:gap-6">
+    <div class="md:col-span-1">
+      <div class="px-4 sm:px-0">
+        <h3 class="text-lg font-medium leading-6 text-gray-900">Monitor Configuration</h3>
+        <p class="mt-1 text-sm text-gray-600">
+          Configure how RippleMemento should monitor your website for changes.
+        </p>
+      </div>
+    </div>
+    
+    <div class="mt-5 md:mt-0 md:col-span-2">
+      <form method="post">
+        <div class="shadow sm:rounded-md sm:overflow-hidden">
+          <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+            
+            <!-- Basic Settings -->
+            <div>
+              <h4 class="text-md font-medium text-gray-900 mb-4">Basic Settings</h4>
+              <div class="grid grid-cols-6 gap-6">
+                <div class="col-span-6">
+                  <label class="block text-sm font-medium text-gray-700">Monitor Name</label>
+                  <input name="name" type="text" required 
+                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                         placeholder="My Website Monitor">
+                </div>
+
+                <div class="col-span-6">
+                  <label class="block text-sm font-medium text-gray-700">URL to Monitor</label>
+                  <input name="url" type="url" required 
+                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                         placeholder="https://example.com">
+                </div>
+
+                <div class="col-span-3">
+                  <label class="block text-sm font-medium text-gray-700">Check Interval (minutes)</label>
+                  <input name="interval_minutes" type="number" min="1" value="30" 
+                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                </div>
+
+                <div class="col-span-3">
+                  <label class="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
+                  <input name="tags" type="text" 
+                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                         placeholder="production, api, important">
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Settings -->
+            <div>
+              <h4 class="text-md font-medium text-gray-900 mb-4">Advanced Settings</h4>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">CSS Selector (optional)</label>
+                  <input name="css_selector" type="text" 
+                         class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                         placeholder="#content, .main-article, body > div">
+                  <p class="mt-2 text-sm text-gray-500">Only monitor specific parts of the page using CSS selectors.</p>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Custom Headers (JSON)</label>
+                  <textarea name="headers" rows="3" 
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md"
+                            placeholder='{"Authorization": "Bearer token", "User-Agent": "Custom"}'></textarea>
+                  <p class="mt-2 text-sm text-gray-500">Custom HTTP headers to send with requests.</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Ignore Text (one per line)</label>
+                    <textarea name="ignore_text" rows="4" 
+                              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md"
+                              placeholder="Copyright 2024&#10;Last updated&#10;Advertisement"></textarea>
+                    <p class="mt-2 text-sm text-gray-500">Text patterns to ignore when detecting changes.</p>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Trigger Text (one per line)</label>
+                    <textarea name="trigger_text" rows="4" 
+                              class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border border-gray-300 rounded-md"
+                              placeholder="Error&#10;Update&#10;New Version"></textarea>
+                    <p class="mt-2 text-sm text-gray-500">Only trigger alerts when these words appear.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div>
+              <h4 class="text-md font-medium text-gray-900 mb-4">Notification Settings</h4>
+              <div class="flex items-center">
+                <input id="notification_enabled" name="notification_enabled" type="checkbox" checked
+                       class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                <label for="notification_enabled" class="ml-2 block text-sm text-gray-900">
+                  Enable notifications for this monitor
+                </label>
+              </div>
+              <p class="mt-2 text-sm text-gray-500">
+                Notifications will be sent to all configured endpoints when changes are detected.
+                <a href="/notifications" class="text-indigo-600 hover:text-indigo-500">Configure notification endpoints →</a>
+              </p>
+            </div>
+
+          </div>
+          
+          <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 space-x-3">
+            <a href="/" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Cancel
+            </a>
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Create Monitor
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
